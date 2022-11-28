@@ -1,0 +1,130 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #252525;
+  color: white;
+  min-height: 80vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.wrapper {
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.game-field {
+  position: relative;
+  width: 600px;
+  height: 600px;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 58px);
+  grid-template-rows: repeat(10, 58px);
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+
+#snake-head,
+#snake-tale,
+.snake-body {
+  position: relative;
+  width: 50px;
+  height: 50px;
+
+}
+
+#snake-head::before,
+#snake-tale::before,
+.snake-body::before {
+  display: block;
+  position: absolute;
+  left: 6px;
+  right: 7px;
+  top: 0;
+  bottom: 0;
+  content: "";
+  background: limegreen;
+}
+
+#snake-head,
+#snake-tale {
+  height: 40px;
+}
+
+#snake-head::before {
+  height: 40px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+#snake-tale::before {
+  height: 40px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.game-item {
+  position: relative;
+  left: 300px;
+  top: 300px;
+  height: 50px;
+  width: 50px;
+  background-size: 30px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.game-item--apple {
+  background-image: url("images/apple.png");
+}
+.game-item--orange {
+  background-image: url("images/orange.png");
+}
+.game-item--grap {
+  background-image: url("images/grap.png");
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background: #3b3b3b;
+  font-size: 32px;
+  text-transform: uppercase;
+}
+
+#score {
+  font-weight: bold;
+  margin-left: 10px;
+  color: limegreen;
+}
+
+#action-button {
+  cursor: pointer;
+  height: 48px;
+}
+
+#action-button img {
+  height: 100%;
+}
+
+.cell {
+  outline: 1px solid rgba(255, 255, 255, .1);
+  background: #151515;
+}
+
+.cell.snake {
+  background: green;
+}
