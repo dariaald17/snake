@@ -85,16 +85,6 @@ body {
   background-position: center;
 }
 
-.game-item--apple {
-  background-image: url("images/apple.png");
-}
-.game-item--orange {
-  background-image: url("images/orange.png");
-}
-.game-item--grap {
-  background-image: url("images/grap.png");
-}
-
 .menu {
   display: flex;
   align-items: center;
@@ -122,9 +112,22 @@ body {
 
 .cell {
   outline: 1px solid rgba(255, 255, 255, .1);
-  background: #151515;
+  background-color: #151515;
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .cell.snake {
   background: green;
+}
+
+.game-item--apple {
+  background-image: url("images/apple.png");
+}
+.game-item--orange {
+  background-image: url("images/orange.png");
+}
+.game-item--grap {
+  background-image: url("images/grap.png");
 }
