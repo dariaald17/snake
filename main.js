@@ -9,7 +9,7 @@ const btnAction = document.getElementById('action-button')
 const state = {
   cells: [],
   snake: {
-    direction: [0, -1],
+    direction: [0, 1],
     coords: [[5, 2], [5, 3], [5, 4]],
   },
   fruitPosition: null,
@@ -101,3 +101,17 @@ const main = () => {
 }
 
 main()
+
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'ArrowUp') {
+    state.snake.direction = [0, 1];
+    state.snake.direction[0] = 0;
+    state.snake.direction[1] = -1;
+console.log(45678);
+}
+else if (event.code === 'ArrowDown') {
+  state.snake.direction = [0,-1];
+  state.snake.direction[0] = 0;
+  state.snake.direction[1] = 1;
+}
+})
