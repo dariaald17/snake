@@ -6,14 +6,29 @@ const COLUMN_NUMBER = 10;
 const grid = document.querySelector('.game-grid')
 const btnAction = document.getElementById('action-button')
 
+const gameStatuses = {
+  init: 'Init',
+  play: 'Play',
+  pause: 'Pause',
+  end: 'End',
+}
+
+const directions = {
+  up: 'up',
+  down: 'down',
+  left: 'left',
+  right: 'right',
+}
+
 const state = {
+  status: gameStatuses.play,
   cells: [],
   snake: {
-    direction: [0, 1],
-    coords: [[5, 2], [5, 3], [5, 4]],
+    direction: directions.up,
+    coords: [[5, 7], [5, 8], [5, 9]],
   },
   fruitPosition: null,
-  fruit: null
+  fruit: null,
 };
 
 function getRandomInt(min, max) {
@@ -76,22 +91,46 @@ const generateFruit = () => {
 
 function getFruitClass() {
   const classes = ['apple', 'orange', 'grap']
-  const index = Math.round(Math.random() * (classes.length - 1))
+  const index = getRandomInt(0, classes.length - 1)
   return 'game-item--' + classes[index]
 }
 
 const moveSnake = () => {
-  state.snake.coords.forEach((coord) => {
-    coord[0] += state.snake.direction[0];
-    coord[1] += state.snake.direction[1];
+  let next = [...state.snake.coords[0]]
+  moveSnakeHead()
+  state.snake.coords.forEach((coord, i) => {
+    if (i > 0) {
+      const temp = [...state.snake.coords[i]]
+      state.snake.coords[i] = next
+      next = temp
+    }
   });
 }
 
+const moveSnakeHead = () => {
+  switch (state.snake.direction) {
+    case directions.up:
+      state.snake.coords[0][1] = state.snake.coords[0][1] - 1
+      break
+    case directions.down:
+      state.snake.coords[0][1] = state.snake.coords[0][1] + 1
+      break
+    case directions.left:
+      state.snake.coords[0][0] = state.snake.coords[0][0] - 1
+      break
+    case directions.right:
+      state.snake.coords[0][0] = state.snake.coords[0][0] + 1
+      break
+  }
+}
+
 const tick = () => {
-  moveSnake();
-  placeSnake();
-  render();
-  setTimeout(tick, 1000);
+  if (state.status === gameStatuses.play) {
+    moveSnake();
+    placeSnake();
+    render();
+    setTimeout(tick, 1000);
+  }
 }
 
 const main = () => {
@@ -103,15 +142,18 @@ const main = () => {
 main()
 
 document.addEventListener('keydown', (event) => {
-  if (event.code === 'ArrowUp') {
-    state.snake.direction = [0, 1];
-    state.snake.direction[0] = 0;
-    state.snake.direction[1] = -1;
-console.log(45678);
-}
-else if (event.code === 'ArrowDown') {
-  state.snake.direction = [0,-1];
-  state.snake.direction[0] = 0;
-  state.snake.direction[1] = 1;
-}
+  const current = state.snake.direction
+
+  if (event.code === 'ArrowUp' && current !== directions.down) {
+    state.snake.direction = directions.up
+  }
+  else if (event.code === 'ArrowDown' && current !== directions.up) {
+    state.snake.direction = directions.down
+  }
+  else if (event.code === 'ArrowLeft' && current !== directions.right) {
+    state.snake.direction = directions.left
+  }
+  else if (event.code === 'ArrowRight' && current !== directions.left) {
+    state.snake.direction = directions.right
+  }
 })
