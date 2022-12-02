@@ -5,6 +5,23 @@ const COLUMN_NUMBER = 10;
 
 const grid = document.querySelector('.game-grid')
 const btnAction = document.getElementById('action-button')
+document.getElementById('action-button').addEventListener('click', () =>{
+   tick();
+})
+
+const gameStatuses = {
+  init: 'Init',
+  play: 'Play',
+  pause: 'Pause',
+  end: 'End',
+}
+
+const directions = {
+  up: 'up',
+  down: 'down',
+  left: 'left',
+  right: 'right',
+}
 
 const gameStatuses = {
   init: 'Init',
@@ -23,11 +40,11 @@ const directions = {
 const state = {
   status: gameStatuses.play,
   cells: [],
+  score: 0,
   snake: {
     direction: directions.up,
     coords: [[5, 7], [5, 8], [5, 9]],
   },
-  fruitPosition: null,
   fruit: null,
 };
 
@@ -47,7 +64,7 @@ function generateGrid() {
         element,
         rowIndex, columnIndex,
         isSnake: false,
-        isFruit: '',
+        fruit: '',
       }
       state.cells.push(cell);
     }
@@ -67,11 +84,8 @@ const render = () => {
   state.cells.forEach((cell) => {
     cell.element.className = 'cell';
     if (cell.isSnake) cell.element.classList.add('snake');
-    else if (cell.isFruit !== '') cell.element.classList.add(cell.isFruit);
+    else if (cell.fruit !== '') cell.element.classList.add(cell.fruit);
   })
-}
-
-const renderSnake = () => {
 }
 
 const generateFruit = () => {
@@ -82,11 +96,11 @@ const generateFruit = () => {
   while (isInvalidPoint) {
     columnIndex = getRandomInt(0, COLUMN_NUMBER);
     rowIndex = getRandomInt(0, ROW_NUMBER);
-  
+
     isInvalidPoint = state.snake.coords.some((coord) => coord[0] === columnIndex || coord[1] === rowIndex);
   }
 
-  state.cells[rowIndex * COLUMN_NUMBER + columnIndex].isFruit = getFruitClass();
+  state.cells[rowIndex * COLUMN_NUMBER + columnIndex].fruit = getFruitClass();
 }
 
 function getFruitClass() {
@@ -96,32 +110,59 @@ function getFruitClass() {
 }
 
 const moveSnake = () => {
-  let next = [...state.snake.coords[0]]
-  moveSnakeHead()
-  state.snake.coords.forEach((coord, i) => {
-    if (i > 0) {
-      const temp = [...state.snake.coords[i]]
-      state.snake.coords[i] = next
+  const coords = state.snake.coords
+
+  let next = [...coords[0]]
+  const last = [...coords[coords.length - 1]]
+
+  const isFruitEaten = moveSnakeHead()
+
+  state.snake.coords.forEach((coord, index) => {
+    if (index > 0) {
+      const temp = [...coords[index]]
+      coords[index] = next
       next = temp
     }
   });
+
+  if (isFruitEaten) {
+    generateFruit()
+    coords.push(last)
+  }
 }
 
 const moveSnakeHead = () => {
+  let isFruitEaten = false
+  const xCoordinate = state.snake.coords[0][0]
+  const yCoordinate = state.snake.coords[0][1]
+
   switch (state.snake.direction) {
     case directions.up:
-      state.snake.coords[0][1] = state.snake.coords[0][1] - 1
+      state.snake.coords[0][1] = yCoordinate - 1
       break
     case directions.down:
-      state.snake.coords[0][1] = state.snake.coords[0][1] + 1
+      state.snake.coords[0][1] = yCoordinate + 1
       break
     case directions.left:
-      state.snake.coords[0][0] = state.snake.coords[0][0] - 1
+      state.snake.coords[0][0] = xCoordinate - 1
       break
     case directions.right:
-      state.snake.coords[0][0] = state.snake.coords[0][0] + 1
+      state.snake.coords[0][0] = xCoordinate + 1
       break
   }
+
+  placeSnake()
+
+  state.cells.forEach((cell) => {
+    if (cell.isSnake && cell.fruit) {
+      state.score++
+      document.getElementById('score').innerHTML=state.score;
+      cell.fruit = ''
+      isFruitEaten = true
+    }
+  })
+
+  return isFruitEaten
 }
 
 const tick = () => {
@@ -129,20 +170,35 @@ const tick = () => {
     moveSnake();
     placeSnake();
     render();
-    setTimeout(tick, 1000);
   }
+  setTimeout(tick, 300);
 }
 
 const main = () => {
   generateGrid();
   generateFruit();
-  tick();
+  //tick();
 }
 
 main()
 
+const changeGameStatus = (status) => {
+  if (status === gameStatuses.pause) {
+    if (state.status === gameStatuses.pause) {
+      state.status = gameStatuses.play
+    }
+    else if (state.status === gameStatuses.play) {
+      state.status = gameStatuses.pause
+    }
+  }
+}
+
 document.addEventListener('keydown', (event) => {
   const current = state.snake.direction
+
+  if (event.code === 'Space') {
+    changeGameStatus(gameStatuses.pause)
+  }
 
   if (event.code === 'ArrowUp' && current !== directions.down) {
     state.snake.direction = directions.up
