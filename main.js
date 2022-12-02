@@ -23,6 +23,20 @@ const directions = {
   right: 'right',
 }
 
+const gameStatuses = {
+  init: 'Init',
+  play: 'Play',
+  pause: 'Pause',
+  end: 'End',
+}
+
+const directions = {
+  up: 'up',
+  down: 'down',
+  left: 'left',
+  right: 'right',
+}
+
 const state = {
   status: gameStatuses.play,
   cells: [],
@@ -151,12 +165,10 @@ const moveSnakeHead = () => {
   return isFruitEaten
 }
 
-
-
 const tick = () => {
   if (state.status === gameStatuses.play) {
     moveSnake();
-     placeSnake();
+    placeSnake();
     render();
   }
   setTimeout(tick, 300);
@@ -201,4 +213,3 @@ document.addEventListener('keydown', (event) => {
     state.snake.direction = directions.right
   }
 })
-document.addEventListener('')
