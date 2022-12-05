@@ -44,19 +44,6 @@ body {
 
 }
 
-#snake-head::before,
-#snake-tale::before,
-.snake-body::before {
-  display: block;
-  position: absolute;
-  left: 6px;
-  right: 7px;
-  top: 0;
-  bottom: 0;
-  content: "";
-  background: limegreen;
-}
-
 #snake-head,
 #snake-tale {
   height: 40px;
@@ -130,4 +117,55 @@ body {
 }
 .game-item--grap {
   background-image: url("images/grap.png");
+}
+
+[data-status="play"] .action-button--play {
+  display: none;
+}
+[data-status="pause"] .action-button--pause {
+  display: none;
+}
+
+.game-text-layout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0, .7);
+  opacity: 0;
+  transition: opacity .3s ease-in-out;
+  z-index: 1;
+}
+
+.game-text-layout b {
+  font-size: 32px;
+  color: gold;
+}
+
+.game-text-layout.active {
+  opacity: 1;
+}
+
+.game-text-layout--init,
+.game-text-layout--pause,
+.game-text-layout--end {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+[data-layout="init"] .game-text-layout--init {
+  display: flex;
+}
+[data-layout="end"] .game-text-layout--end {
+  display: flex;
+}
+[data-layout="pause"] .game-text-layout--pause {
+  display: flex;
 }

@@ -13,8 +13,24 @@
 </head>
 <body>
   <div class="wrapper">
-    <div class="game-field">
+    <div class="game-field" data-layout="init">
       <div class="game-grid"></div>
+
+      <div class="game-text-layout active">
+        <div class="game-text-layout--init">
+          <h3>Лучший результат: <b>0</b></h3>
+        </div>
+        <div class="game-text-layout--end">
+          <h1 style="color: red">Проигрыш</h1>
+          <br>
+          <h3>Ваш счёт: <b id="end-game-score">0</b></h3>
+          <br>
+          <h3>Лучший результат: <b id="best-score">0</b></h3>
+        </div>
+        <div class="game-text-layout--pause">
+          <b>Пауза...</b>
+        </div>
+      </div>
       <!-- <div class="game-item game-item--apple"></div>
       <div id="snake-head"></div>
       <div class="snake-body"></div>
@@ -22,8 +38,16 @@
     </div>
     <div class="menu">
       <div>Score: <span id="score">0</span></div>
-      <div id="action-button">
-        <img src="images/play.png" alt="">
+      <div class="mode">
+      <select name="mode">
+          <option value="1">Легкий</option>
+          <option value="2">Средний</option>
+          <option value="3">Сложный</option>
+          </select>
+        </div>
+      <div id="action-button" data-status="pause">
+        <img class="action-button--play" src="images/play.png" alt="">
+        <img class="action-button--pause" src="images/pause.png" alt="">
       </div>
     </div>
   </div>

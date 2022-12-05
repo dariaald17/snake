@@ -1,13 +1,19 @@
-const AREA_WIDTH = 600
-const BLOCK_WIDTH = 50
 const ROW_NUMBER = 10;
 const COLUMN_NUMBER = 10;
 
+const scoreNode = document.getElementById('score')
+const endGameScoreNode = document.getElementById('end-game-score')
+const bestScoreNode = document.getElementById('best-score')
+
+let bestScore = localStorage.getItem('best') || 0
+bestScoreNode.textContent = bestScore
+
+const gameField = document.querySelector('.game-field')
+const gameTextLayout = document.querySelector('.game-text-layout')
 const grid = document.querySelector('.game-grid')
 const btnAction = document.getElementById('action-button')
-document.getElementById('action-button').addEventListener('click', () =>{
-   tick();
-})
+
+let interval = setInterval(tick, 300)
 
 const gameStatuses = {
   init: 'Init',
@@ -23,30 +29,22 @@ const directions = {
   right: 'right',
 }
 
-const gameStatuses = {
-  init: 'Init',
-  play: 'Play',
-  pause: 'Pause',
-  end: 'End',
-}
+const cells = []
 
-const directions = {
-  up: 'up',
-  down: 'down',
-  left: 'left',
-  right: 'right',
+const getInitSnakeCoords = () => {
+  return [[5, 6], [5, 7], [5, 8]]
 }
 
 const state = {
-  status: gameStatuses.play,
-  cells: [],
+  status: gameStatuses.init,
+  cells,
   score: 0,
   snake: {
     direction: directions.up,
-    coords: [[5, 7], [5, 8], [5, 9]],
+    coords: getInitSnakeCoords(),
   },
   fruit: null,
-};
+}
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
@@ -66,18 +64,53 @@ function generateGrid() {
         isSnake: false,
         fruit: '',
       }
-      state.cells.push(cell);
+      cells.push(cell);
     }
   }
 }
 
-const placeSnake = () => {
-  state.cells.forEach((cell) => cell.isSnake = false);
+function resetGameProgress() {
+  state.score = 0
+  state.snake.direction = directions.up
+  state.snake.coords = getInitSnakeCoords()
+  state.fruit = null
+}
 
-  state.snake.coords.forEach(([columnIndex, rowIndex]) => {
-    const cellIndex = rowIndex * COLUMN_NUMBER + columnIndex
-    state.cells[cellIndex].isSnake = true;
-  });
+function resetCellsData() {
+  cells.forEach((cell) => {
+    const oldCell = cell
+    const element = oldCell.element
+    element.className = 'cell'
+
+    cell = {
+      ...oldCell,
+      element,
+      isSnake: false,
+      fruit: ''
+    }
+  })
+}
+
+const placeSnake = () => {
+  let isEnd = false
+
+  try {
+    state.cells.forEach((cell) => cell.isSnake = false);
+
+    state.snake.coords.forEach(([columnIndex, rowIndex]) => {
+      const cellIndex = rowIndex * COLUMN_NUMBER + columnIndex
+      if (state.cells[cellIndex].isSnake) {
+        isEnd = true
+      }
+      state.cells[cellIndex].isSnake = true;
+    });
+  } catch (e) {
+    console.log('e: ', state.snake.coords)
+  }
+
+  if (isEnd) {
+    endGame()
+  }
 }
 
 const render = () => {
@@ -110,6 +143,7 @@ function getFruitClass() {
 }
 
 const moveSnake = () => {
+  let isGameEnd = false
   const coords = state.snake.coords
 
   let next = [...coords[0]]
@@ -125,8 +159,25 @@ const moveSnake = () => {
     }
   });
 
+  state.snake.coords.forEach((coord) => {
+    if (
+      coord[0] > ROW_NUMBER - 1 ||
+      coord[0] < 0 ||
+      coord[1] > COLUMN_NUMBER - 1 ||
+      coord[1] < 0
+    ) {
+      isGameEnd = true
+    }
+  })
+
+  if (isGameEnd) {
+    return endGame()
+  }
+
   if (isFruitEaten) {
     generateFruit()
+    scoreNode.innerHTML = state.score;
+    endGameScoreNode.textContent = state.score
     coords.push(last)
   }
 }
@@ -156,7 +207,6 @@ const moveSnakeHead = () => {
   state.cells.forEach((cell) => {
     if (cell.isSnake && cell.fruit) {
       state.score++
-      document.getElementById('score').innerHTML=state.score;
       cell.fruit = ''
       isFruitEaten = true
     }
@@ -165,31 +215,75 @@ const moveSnakeHead = () => {
   return isFruitEaten
 }
 
-const tick = () => {
+function tick() {
   if (state.status === gameStatuses.play) {
     moveSnake();
-    placeSnake();
-    render();
+    if (state.status !== gameStatuses.end) {
+      placeSnake();
+      render();
+    }
   }
-  setTimeout(tick, 300);
 }
 
-const main = () => {
-  generateGrid();
-  generateFruit();
-  //tick();
-}
+const endGame = () => {
+  bestScoreNode.textContent = localStorage.getItem('best') || 0
+  window.clearInterval(interval)
+  interval = null
+  state.status = gameStatuses.end
+  btnAction.dataset.status = 'pause'
+  gameField.dataset.layout = 'end'
+  gameTextLayout.classList.add('active')
 
-main()
+  if (state.score > Number(bestScore)) {
+    bestScore = state.score
+    localStorage.setItem('best', bestScore)
+  }
+
+  resetGameProgress()
+  resetCellsData()
+}
 
 const changeGameStatus = (status) => {
-  if (status === gameStatuses.pause) {
+  if (status === gameStatuses.end) {
+    return endGame()
+  }
+
+  if (
+    status === gameStatuses.play &&
+    (state.status === gameStatuses.end || state.status === gameStatuses.init)
+  ) {
+    btnAction.dataset.status = 'play'
+    gameField.dataset.layout = ''
+    gameTextLayout.classList.remove('active')
+    initAndStartGame()
+    return
+  }
+
+  if (status === gameStatuses.pause || status === gameStatuses.play) {
     if (state.status === gameStatuses.pause) {
+      gameField.dataset.layout = ''
       state.status = gameStatuses.play
+      btnAction.dataset.status = 'play'
+      gameTextLayout.classList.remove('active')
     }
     else if (state.status === gameStatuses.play) {
       state.status = gameStatuses.pause
+      btnAction.dataset.status = 'pause'
+      gameField.dataset.layout = 'pause'
+      gameTextLayout.classList.add('active')
     }
+  }
+}
+
+function initAndStartGame() {
+  scoreNode.textContent = '0'
+  endGameScoreNode.textContent = '0'
+  resetGameProgress()
+  resetCellsData()
+  state.status = gameStatuses.play
+
+  if (!interval) {
+    interval = setInterval(tick, 1000)
   }
 }
 
@@ -213,3 +307,27 @@ document.addEventListener('keydown', (event) => {
     state.snake.direction = directions.right
   }
 })
+
+btnAction.addEventListener('click', function () {
+  switch (state.status) {
+    case gameStatuses.init:
+      changeGameStatus(gameStatuses.play)
+      break
+    case gameStatuses.pause:
+      changeGameStatus(gameStatuses.play)
+      break
+    case gameStatuses.end:
+      changeGameStatus(gameStatuses.play)
+      break
+    case gameStatuses.play:
+      changeGameStatus(gameStatuses.pause)
+      break
+  }
+})
+
+const main = () => {
+  generateGrid();
+  generateFruit();
+}
+
+main()
